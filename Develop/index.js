@@ -1,13 +1,71 @@
-// TODO: Include packages needed for this application
+const fs = require("fs");
+const CLI = require("./cli.js");
+const { callbackify } = require("util");
 
-// TODO: Create an array of questions for user input
-const questions = [];
+const questions = [
+    "What is the title of your project?",
+    "What is the description of your project?",
+    "What are the installations used?",
+    "Usage?",
+    "What is the license?",
+    "Contributers?",
+    "Tests",
+    "GitHub Username",
+    "Email"
+];
 
-// TODO: Create a function to write README file
-function writeToFile(fileName, data) {}
+async function main() {
+    let cli = new CLI(questions);
+    let data = await cli.run();
+    data = convertDataToReadMe(data);
+    writeToFile("README.md", data, () => {
+    });
+}
+main();
 
-// TODO: Create a function to initialize app
-function init() {}
+function writeToFile(fileName, data, callback) {
+    fs.writeFile(fileName, data, callback);
+}
 
-// Function call to initialize app
-init();
+let readme = [
+    "",
+    "Description",
+    "Installations",
+    "Usage",
+    "Licenses",
+    "Contributers",
+    "Tests",
+    "Questions"
+]
+
+function convertDataToReadMe(data) {
+    let output = [];
+    for (let i = 0; i < data.length; i++) {
+        if (i === 0) {
+            output.push("# " + data[i]);
+            continue;
+        }
+        if (i > 6) {
+            let question = "";
+            question += "https://github.com/" + data[i];
+            question += "\n\n" ;
+            question += data[i + 1];
+            output.push("## " + readme[i] + "\n" + question)
+            let tableOfContents = "## Table of Contents\n";
+            for (let i = 0; i < readme.length; i++) {
+                if (i === 0) continue;
+                tableOfContents += `[${readme[i]}](#${readme[i].replace(" ", "-").toLowerCase()})\n\n`;
+            }
+            output.push(tableOfContents);
+            break;
+        }
+
+        // if (data[i] === "") {
+        //     output.push(readme[i]);
+        //     continue;
+        // }
+
+        output.push("## " + readme[i] + "\n" + data[i]);
+    }
+    return output.join("\n\n");
+}
